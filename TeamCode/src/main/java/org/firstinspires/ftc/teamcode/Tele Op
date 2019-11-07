@@ -30,31 +30,32 @@ public class TELEOP_Copy extends LinearOpMode {
     backleft = hardwareMap.dcMotor.get("back left");
     frontright = hardwareMap.dcMotor.get("front right ");
 
-    frontleft.setDirection(DcMotorSimple.Direction.REVERSE);
+    frontright.setDirection(DcMotorSimple.Direction.REVERSE);
     backright.setDirection(DcMotorSimple.Direction.REVERSE);
     Latch.setDirection(Servo.Direction.REVERSE);
     Latch.setPosition(0);
     claw.setPosition(.6);
-    frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-    frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-    backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-    backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+    frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     // Put initialization blocks here.
     waitForStart();
     if (opModeIsActive()) {
       while (opModeIsActive()) {
-        frontleft.setPower(-gamepad1.left_stick_x);
-        backright.setPower(gamepad1.left_stick_x);
-        backleft.setPower(-gamepad1.left_stick_x);
-        frontright.setPower(gamepad1.left_stick_x);
-        frontleft.setPower(-gamepad1.right_stick_x);
-        backright.setPower(-gamepad1.right_stick_x);
-        frontright.setPower(gamepad1.right_stick_x);
-        backleft.setPower(gamepad1.right_stick_x);
-        frontleft.setPower(gamepad1.left_stick_y);
-        frontright.setPower(gamepad1.left_stick_y);
-        backright.setPower(-gamepad1.left_stick_y);
-        backleft.setPower(-gamepad1.left_stick_y);
+        double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
+        double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+        double rightX = gamepad1.right_stick_x;
+        final double v1 = r * Math.cos(robotAngle) + rightX;
+        final double v2 = r * Math.sin(robotAngle) - rightX;
+        final double v3 = r * Math.sin(robotAngle) + rightX;
+        final double v4 = r * Math.cos(robotAngle) - rightX;
+
+        frontleft.setPower(v1);
+        frontright.setPower(v2);
+        backleft.setPower(v3);
+        backright.setPower(v4); 
+       
         telemetry.addData("Left Front Power", frontleft.getPower());
         telemetry.addData("Left Back Power", backleft.getPower());
         telemetry.addData("Right Front Power", frontright.getPower());
@@ -81,6 +82,7 @@ public class TELEOP_Copy extends LinearOpMode {
         telemetry.addData("Latch Position", Latch.getPosition());
         telemetry.update();
       }
+      
       // Put run blocks here.
     }
   }
