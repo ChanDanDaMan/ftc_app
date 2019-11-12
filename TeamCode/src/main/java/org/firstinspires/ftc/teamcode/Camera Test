@@ -1,0 +1,149 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaSkyStone;
+import org.firstinspires.ftc.robotcore.external.tfod.TfodSkyStone;
+
+@Autonomous(name = "CameraTest ", group = "")
+public class CameraTest extends LinearOpMode {
+
+  private VuforiaSkyStone vuforiaSkyStone;
+  private DcMotor frontright;
+  private DcMotor backright;
+  private Servo claw;
+  private TfodSkyStone tfodSkyStone;
+  private DcMotor frontleft;
+
+  /**
+   * This function is executed when this Op Mode is selected from the Driver Station.
+   */
+  @Override
+  public void runOpMode() {
+    vuforiaSkyStone = new VuforiaSkyStone();
+    frontright = hardwareMap.dcMotor.get("front right ");
+    backright = hardwareMap.dcMotor.get("back right ");
+    claw = hardwareMap.servo.get("claw");
+    tfodSkyStone = new TfodSkyStone();
+    frontleft = hardwareMap.dcMotor.get("front left");
+
+    // Initialization
+    telemetry.addData("init", "Started");
+    telemetry.update();
+    vuforiaSkyStone.initialize(
+        "", // vuforiaLicenseKey
+        hardwareMap.get(WebcamName.class, "Webcam 1"), // cameraName
+        "teamwebcamcalibrations.xml", // webcamCalibrationFilename
+        false, // useExtendedTracking
+        true, // enableCameraMonitoring
+        VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES, // cameraMonitorFeedback
+        0, // dx
+        0, // dy
+        0, // dz
+        0, // xAngle
+        0, // yAngle
+        0, // zAngle
+        false); // useCompetitionFieldTargetLocations
+    frontright.setDirection(DcMotorSimple.Direction.REVERSE);
+    backright.setDirection(DcMotorSimple.Direction.REVERSE);
+    claw.setPosition(0);
+    // Init Vuforia because Tensor Flow needs it.
+    telemetry.addData("Vuforia", "initialized");
+    // Let's use 50% minimum confidence and no object tracker.
+    telemetry.update();
+    tfodSkyStone.initialize(vuforiaSkyStone, 0.5F, false, true);
+    telemetry.addData(">", "Press Play to Start");
+    telemetry.update();
+    // Sset target ratio of object height to image height value corresponding to the length of the robot;s neck.
+    TargetHeightRatio = 0.8;
+    waitForStart();
+    tfodSkyStone.activate();
+    // We'll loop until gold bock captured or time is up
+    Skystone_Found = false;
+    while (opModeIsActive() && !Skystone_Found) {
+      // Get list of current recognition.
+      recognitions = tfodSkyStone.getRecognitions();
+      // Report number of recognition
+      telemetry.addData("Objects Recognized", recognitions.size());
+      // If some objects detected...
+      if (recognitions.size() > 0) {
+        // ...let's count how many are gold
+        SkystoneCount = 0;
+        // Step through the stones detected.
+        // TODO: Enter the type for variable named recognitions
+        for (UNKNOWN_TYPE recognitions : recognitions) {
+          if (recognitions.getLabel().equals("Skystone")) {
+            // Change to Skystone
+            // A Skystone has been detected.
+            SkystoneCount = SkystoneCount + 1;
+            // We can assume this is the first Skystone because we break out of this loop below after using the information from the first Skystone. We don't need to calculate turn angle to Skystone. We don't need to calculate turn angle to Skystone because TensorFlow has estimated it for us.
+            ObjectAngle = _7BtfodRecognitionVariable_7D.estimateAngleToObject(AngleUnit.DEGREES);
+            // Negative angle means Skystone is left, else right.
+            telemetry.addData("Estimated Angle", ObjectAngle);
+            if (ObjectAngle > 0) {
+              telemetry.addData("Direction ", "Right");
+            } else {
+              telemetry.addData("Direction", "Left");
+            }
+            LeftPower = 0.25 * (ObjectAngle / 45);
+            RightPower = -0.25 * (ObjectAngle / 45);
+            ImageHieght = recognitions.getImageHeight();
+            ObjectHeight = recognitions.getHeight();
+            ObjectHeightRatio = ObjectHeight / ImageHieght;
+            telemetry.addData("HeightRatio", ObjectHeightRatio);
+            if (ObjectHeightRatio > TargetHeightRatio - 0.05) {
+              telemetry.addData("Distance ", "Not close enough");
+              if (Math.abs(LeftPower) + Math.abs(RightPower) < 0.2) {
+                telemetry.addData("Acttion", "forward");
+                LeftPower = 0.035 + 0.5 * ((TargetHeightRatio - 0.05) - ObjectHeightRatio);
+                RightPower = LeftPower;
+              } else {
+                telemetry.addData("Action", "Turn");
+              }
+            } else if (ObjectHeightRatio > TargetHeightRatio + 0.05) {
+              telemetry.addData("Distance ", "Too close");
+              if (Math.abs(LeftPower) + Math.abs(RightPower) < 0.12) {
+                telemetry.addData("Action", "Motors off, hit the Skystone");
+                LeftPower = 0;
+                RightPower = 0;
+                claw.setPosition(0.5);
+              } else {
+                telemetry.addData("Action", "Turn");
+              }
+            }
+            telemetry.addData("Left Power", LeftPower);
+            telemetry.addData("Right Power", RightPower);
+            frontleft.setPower(LeftPower);
+            frontright.setPower(RightPower);
+            break;
+          }
+        }
+        if (SkystoneCount == 0) {
+          telemetry.addData("Status ", "No Skystone");
+          telemetry.addData("Action", "Back up ");
+          frontleft.setPower(-0.1);
+          frontright.setPower(-0.1);
+        }
+      } else {
+        telemetry.addData("Status", "No objects detected");
+        telemetry.addData("Action", "Back Up");
+        frontleft.setPower(-0.1);
+        frontright.setPower(-0.1);
+      }
+      telemetry.update();
+      tfodSkyStone.deactivate();
+      frontleft.setPower(0);
+      frontright.setPower(0);
+      sleep(2000);
+    }
+
+    vuforiaSkyStone.close();
+    tfodSkyStone.close();
+  }
+}
