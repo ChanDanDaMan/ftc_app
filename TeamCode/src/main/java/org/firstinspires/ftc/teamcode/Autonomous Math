@@ -1,0 +1,63 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+@Autonomous(name = "Autonomous2 (Blocks to Java)", group = "")
+public class Autonomous2 extends LinearOpMode {
+
+  private DcMotor frontright;
+  private DcMotor backright;
+  private DcMotor Latch;
+  private DcMotor frontleft;
+  private DcMotor backleft;
+
+  /**
+   * This function is executed when this Op Mode is selected from the Driver Station.
+   */
+  @Override
+  public void runOpMode() {
+    frontright = hardwareMap.dcMotor.get("front right ");
+    backright = hardwareMap.dcMotor.get("back right ");
+    Latch = hardwareMap.dcMotor.get("Latch");
+    frontleft = hardwareMap.dcMotor.get("front left");
+    backleft = hardwareMap.dcMotor.get("back left");
+
+    frontright.setDirection(DcMotorSimple.Direction.REVERSE);
+    backright.setDirection(DcMotorSimple.Direction.REVERSE);
+    Latch.setDirection(DcMotorSimple.Direction.REVERSE);
+    
+    frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    // Put initialization blocks here.
+    waitForStart();
+    if (opModeIsActive()) {
+      // Put run blocks here.
+      while (opModeIsActive()) {
+        // Put loop blocks here.
+        double r = Math.hypot(6.375,7.25);
+        double robotAngle = Math.atan2(7.25,6.375) - (Math.PI / 4);
+        final double v1 = r * Math.cos(robotAngle);
+        final double v2 = r * Math.sin(robotAngle);
+        final double v3 = r * Math.sin(robotAngle);
+        final double v4 = r * Math.cos(robotAngle);
+        
+        frontleft.setPower(v1);
+        frontright.setPower(v2);
+        backleft.setPower(v3);
+        backright.setPower(v4);
+        telemetry.update();
+      }
+    }
+  }
+}
+while (gamepad1.left_stick_button) {
+          frontleft.setPower(v1 * (.7 * .5));
+          frontright.setPower(v2 * (.7 * .5));
+          backleft.setPower(v3 * (.7 * .5));
+          backright.setPower(v4 * (.7 * .5));
+        }
