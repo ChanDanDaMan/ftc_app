@@ -1,89 +1,70 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import java.security.Guard;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Tele Op", group = "")
-public class TELEOP_Copy extends LinearOpMode {
+@TeleOp (name = "Tele Op", group = "")
+
+public class TeleOp extends LinearOpMode {
 
   private DcMotor frontleft;
-  private DcMotor backright;
-  private Servo Latch;
-  private Servo claw;
-  private DcMotor arm;
-  private DcMotor backleft;
   private DcMotor frontright;
-
-  /**
-   * This function is executed when this Op Mode is selected from the Driver Station.
-   */
+  private DcMotor backleft;
+  private DcMotor backright;
+  private DcMotor Latch;
+  private DcMotor Guard;
+  private Servo Plattform;
+  
   @Override
   public void runOpMode() {
     frontleft = hardwareMap.dcMotor.get("front left");
-    backright = hardwareMap.dcMotor.get("back right ");
-    Latch = hardwareMap.servo.get("Latch ");
-    claw = hardwareMap.servo.get("claw");
-    arm = hardwareMap.dcMotor.get("arm");
+    frontright = hardwareMap.dcMotor.get("front right");
     backleft = hardwareMap.dcMotor.get("back left");
-    frontright = hardwareMap.dcMotor.get("front right ");
-
+    backright  = hardwareMap.dcMotor.get("back right");
+    Latch = hardwareMap.dcMotor.get("Latch");
+    Guard = hardwareMap.dcMotor.get("Guard");
+    Plattform = hardwareMap.servo.get("Plattform");
+    
     frontright.setDirection(DcMotorSimple.Direction.REVERSE);
     backright.setDirection(DcMotorSimple.Direction.REVERSE);
-    Latch.setDirection(Servo.Direction.REVERSE);
-    Latch.setPosition(0);
-    claw.setPosition(.6);
-    frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    Latch.setDirection(DcMotorSimple.Direction.REVERSE);
+    
+    Latch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     frontright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     backright.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    // Put initialization blocks here.
+    frontleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    backleft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    
     waitForStart();
     if (opModeIsActive()) {
-      while (opModeIsActive()) {
+      while (opModeIsActive()) { 
         double r = Math.hypot(gamepad1.left_stick_x, gamepad1.left_stick_y);
-        double robotAngle = Math.atan2(gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
+        double robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
         double rightX = gamepad1.right_stick_x;
         final double v1 = r * Math.cos(robotAngle) + rightX;
         final double v2 = r * Math.sin(robotAngle) - rightX;
         final double v3 = r * Math.sin(robotAngle) + rightX;
         final double v4 = r * Math.cos(robotAngle) - rightX;
-
-        frontleft.setPower(v1);
-        frontright.setPower(v2);
-        backleft.setPower(v3);
-        backright.setPower(v4); 
-       
-        telemetry.addData("Left Front Power", frontleft.getPower());
-        telemetry.addData("Left Back Power", backleft.getPower());
-        telemetry.addData("Right Front Power", frontright.getPower());
-        telemetry.addData("Right Back Power", backright.getPower());
-        if (gamepad2.y) {
-          claw.setPosition(.5);
-        } else if (gamepad2.x) {
-          claw.setPosition(.95);
-        }
-      
-        if (gamepad1.b) {
-          Latch.setPosition(0);
-        } else if (gamepad1.a) {
-          Latch.setPosition(1);
-        }
-        arm.setPower(gamepad2.left_stick_y / 1.48);
-        if (gamepad2.dpad_right) {
-          arm.setPower(gamepad2.right_stick_y / 1);
+        
+        frontleft.setPower(v1 * .7);
+        frontright.setPower(v2 * .7);
+        backleft.setPower(v3 * .7);
+        backright.setPower(v4 * .7);
+        
+        if (gamepad1.a) {
+          Plattform.setPosition(.8);
+        } else if (gamepad1.b) {
+          Plattform.setPosition(0);
         }
         
+          Latch.setPower((gamepad1.left_trigger + -gamepad1.right_trigger) / 2);
         
-        telemetry.addData("Claw Position ", claw.getPosition());
-        telemetry.addData("Motor Power", arm.getPower());
-        telemetry.addData("Latch Position", Latch.getPosition());
         telemetry.update();
       }
-      
-      // Put run blocks here.
     }
-  }
+  }  
 }
