@@ -1,0 +1,31 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+
+@Autonomous(name = "ColorSensor (Blocks to Java)", group = "")
+public class ColorSensor extends LinearOpMode {
+
+  private ColorSensor Sensor1;
+
+  /**
+   * This function is executed when this Op Mode is selected from the Driver Station.
+   */
+  @Override
+  public void runOpMode() {
+    Sensor1 = hardwareMap.colorSensor.get("Sensor1");
+
+    // Put initialization blocks here.
+    waitForStart();
+    if (opModeIsActive()) {
+      Sensor1.enableLed(true);
+      while (opModeIsActive()) {
+        telemetry.addData("Skystone", Sensor1.blue());
+        telemetry.addData("Skystone", Sensor1.green());
+        telemetry.addData("Skystone", Sensor1.red());
+        telemetry.update();
+      }
+    }
+  }
+}
