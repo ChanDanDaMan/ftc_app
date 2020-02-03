@@ -1,0 +1,53 @@
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+
+@Autonomous(name = "sEtPoSiTiOnS (Blocks to Java)", group = "")
+public class sEtPoSiTiOnS extends LinearOpMode {
+
+  private DcMotor FL;
+  private DcMotor FR;
+  private DcMotor BL;
+  private DcMotor BR;
+
+  /**
+   * This function is executed when this Op Mode is selected from the Driver Station.
+   */
+  @Override
+  public void runOpMode() {
+    FL = hardwareMap.dcMotor.get("FL");
+    FR = hardwareMap.dcMotor.get("FR");
+    BL = hardwareMap.dcMotor.get("BL");
+    BR = hardwareMap.dcMotor.get("BR");
+
+    FL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    FR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    BL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    BR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    FL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    FR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    BL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    FL.setTargetPosition(537.6);
+    FR.setTargetPosition(537.6);
+    BL.setTargetPosition(537.6);
+    BR.setTargetPosition(537.6);
+    // Put initialization blocks here.
+    waitForStart();
+    FL.setTargetPosition(537.6);
+    FR.setTargetPosition(537.6);
+    BL.setTargetPosition(537.6);
+    BR.setTargetPosition(537.6);
+    // Put run blocks here.
+    while (opModeIsActive()) {
+      // Put loop blocks here.
+      telemetry.update();
+    }
+  }
+}
